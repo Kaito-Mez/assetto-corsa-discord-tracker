@@ -132,3 +132,5 @@ dmypy.json
 ./config/*
 # Data files
 ./data/*.json
+udp2ws/udp2ws
+udp2ws/udp2ws.ini
