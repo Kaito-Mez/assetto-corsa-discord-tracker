@@ -22,6 +22,8 @@ Event Handlers
 '''
 @assetto.event
 def connect():
+    '''Setup on connection to plugin'''
+
     print("connected ")
     assetto.emit("authenticate", "admin")
     assetto.emit("get_session_info")
@@ -29,6 +31,7 @@ def connect():
 
 @assetto.on("chat")
 def on_message(data):
+    '''Prints chat messages'''
     print("chat message")
     print(data)
     newline()
@@ -51,6 +54,10 @@ def on_lap_completed(lap_data):
 # Triggered when "get_car_info" is emitted
 @assetto.on("car_info")
 def on_car_info(car_data):
+    '''
+    Called when get_car_info is emmited.\n
+    Updates the relevant current session with session data.
+    '''
     print("car_info")
     print((car_data))
 
@@ -63,18 +70,22 @@ def on_car_info(car_data):
 
 @assetto.on("lap_split")
 def on_lap_split(data):
+    '''Doesn't work'''
     print("Lap Split:")
     print(data)
     newline()
 
 @assetto.on("end_session")
 def on_session_ends(data):
+    '''Doesnt work'''
     print("End session")
     print(data)
     newline()
 
 @assetto.on("client_loaded")
 def on_player_join(join_data):
+    '''Sets up a new session class when a player joins'''
+
     print("Player Joined")
     print(join_data)
     newline()
@@ -86,6 +97,8 @@ def on_player_join(join_data):
 
 @assetto.on("connection_closed")
 def on_player_leave(leave_data):
+    '''Finalizes session data when a player leaves'''
+
     print("Player Left")
     print(leave_data)
     newline()
@@ -101,6 +114,7 @@ def on_player_leave(leave_data):
 
 @assetto.on('new_session')
 def on_session_start(session_data):
+    '''Sets current_session when a new session starts'''
     print("Start session")
     print(session_data)
     current_session.clear()
@@ -110,6 +124,7 @@ def on_session_start(session_data):
 
 @assetto.on("session_info")
 def on_session_info(session_data):
+    '''Sets current_session on connection to the plugin'''
     print("Session info")
     print(session_data)
     current_session.clear()
@@ -119,6 +134,7 @@ def on_session_info(session_data):
 
 
 def connect(url):
+    '''Connect to the plugin via socketio at url'''
     assetto.connect(url)
 
 def newline():
