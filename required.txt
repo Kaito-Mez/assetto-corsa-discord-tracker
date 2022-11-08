@@ -1,0 +1,20 @@
+Every players times in each car
+
+
+Every cars best time and the player
+
+
+Each players play-time
+
+Session
+
+
+
+Practice: Most recent posted time, player, car,
+	player practice times
+
+
+Qualification: Best Laptime of each player, Best laptime of each car and which player. 
+
+
+Race: Race results, cars, times
