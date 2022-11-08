@@ -2,18 +2,25 @@ import json
 
 class LapData:
     
-    def __init__(self, json_lap, json_car_info) -> None:
+    def __init__(self, json_lap, session_data) -> None:
         lap_data = json_lap
-        car_data = json_car_info
 
-        self.player = car_data["driver_name"]
-        self.player_id = car_data["driver_guid"]
-        self.car = car_data["car_model"]
-        self.car_id = car_data["car_id"]
+        self.player = session_data.player
+        self.guid = session_data.guid
+        self.car = session_data.car
+        self.car_id = session_data.car_id
         #time in ms
-        self.time = lap_data["laptime"]
+        self.laptime = lap_data["laptime"]
         
 
 
     def to_json(self):
-        return json.dumps(self, indent=4)
+        self_dict = {
+            "player":self.player, 
+            "guid":self.guid,
+            "laptime":self.laptime,
+            "car":self.car,
+            "car_id":self.car_id,
+
+        }
+        return json.dumps(self_dict, indent=4)

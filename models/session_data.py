@@ -15,13 +15,14 @@ class SessionData:
         self.car = None
         self.car_id = session_data["car_id"]
 
-
-    def session_end(self, end_time, json_data):
-        self.end_time = end_time
-
+    def update_car_info(self, json_data):
         self.player = json_data["driver_name"]
         self.guid = json_data["driver_guid"]
         self.car = json_data["car_model"]
+
+    def session_end(self, end_time):
+        self.end_time = end_time
+
         self.session_time = (self.end_time - self.start_time).total_seconds()
 
     def to_json(self):
