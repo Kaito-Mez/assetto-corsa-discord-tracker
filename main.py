@@ -11,9 +11,11 @@ assetto = socketio.Client()
 #discord = AssettoStatsBot()
 '''The discord client'''
 
-current_sessions = {}
+current_clients = {}
 '''Players currently connected to the server format {car_id:session_data}'''
 
+current_session = []
+'''Practice, Qualification or Race'''
 
 '''
 Event Handlers
@@ -37,23 +39,28 @@ def on_lap_completed(lap_data):
     print("Lap Completed:")
     newline()
 
+    car_id = lap_data["car_id"]
+    lap = LapData(lap_data, current_clients[car_id])
 
+    print("DO SOMETHING WITH LAP DATA")
+    print(lap.to_json())
+    print(current_clients)
+    newline()
 
 
 # Triggered when "get_car_info" is emitted
 @assetto.on("car_info")
-def on_car_info(data):
+def on_car_info(car_data):
     print("car_info")
-    print(type(data))
+    print((car_data))
+
+    car_id = car_data["car_id"]
+
+    current_clients[car_id].update_car_info(car_data)
+
+    print(current_clients)
     newline()
 
-'''
-@assetto.on("car_update")
-def on_car_update(data):
-    print("car update")
-    print(data)
-    newline()
-'''
 @assetto.on("lap_split")
 def on_lap_split(data):
     print("Lap Split:")
@@ -61,7 +68,7 @@ def on_lap_split(data):
     newline()
 
 @assetto.on("end_session")
-def on_session_end(data):
+def on_session_ends(data):
     print("End session")
     print(data)
     newline()
@@ -73,7 +80,9 @@ def on_player_join(join_data):
     newline()
     start_time = datetime.now()
     new_session = SessionData(start_time, join_data)
-    current_sessions.update({new_session.car_id:new_session})
+    current_clients.update({new_session.car_id:new_session})
+
+    assetto.emit("get_car_info", new_session.car_id)
 
 @assetto.on("connection_closed")
 def on_player_leave(leave_data):
@@ -81,25 +90,31 @@ def on_player_leave(leave_data):
     print(leave_data)
     newline()
     end_time = datetime.now()
-    session = current_sessions.pop(leave_data["car_id"])
-    session.session_end(end_time, leave_data)
+    session = current_clients.pop(leave_data["car_id"])
+    session.session_end(end_time)
 
     print("DO SOMETHING WITH SESSION DATA")
     print(session.to_json())
-    print(current_sessions)
+    print(current_clients)
     newline()
 
 
 @assetto.on('new_session')
-def on_session_start(data):
+def on_session_start(session_data):
     print("Start session")
-    print(data)
+    print(session_data)
+    current_session.clear()
+    current_session.append(session_data["name"])
+    print(current_session)
     newline()
 
 @assetto.on("session_info")
-def on_session_info(data):
+def on_session_info(session_data):
     print("Session info")
-    print(data)
+    print(session_data)
+    current_session.clear()
+    current_session.append(session_data["name"])
+    print(current_session)
     newline()
 
 
@@ -115,4 +130,3 @@ if __name__ == "__main__":
     url = "http://192.168.1.200:30000"
 
     connect(url)
-    assetto.emit("get_car_info", 10)
