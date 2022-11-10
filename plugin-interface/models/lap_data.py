@@ -18,10 +18,8 @@ class LapData:
         self.laptime = lap_data["laptime"]
         '''Laptime (milliseconds)'''
         
-
-
-    def to_json(self):
-        '''Outputs this lapdata as a json style string'''
+    def __str__(self):
+        '''Outputs this lapdata as a serialized json style string'''
         
         self_dict = {
             "player":self.player, 
@@ -32,3 +30,17 @@ class LapData:
 
         }
         return json.dumps(self_dict, indent=4)
+
+
+    def to_json(self):
+        '''Outputs this lapdata as a serialized json object'''
+        
+        self_dict = {
+            "player":self.player, 
+            "guid":self.guid,
+            "laptime":self.laptime,
+            "car":self.car,
+            "car_id":self.car_id,
+
+        }
+        return self_dict

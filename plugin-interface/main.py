@@ -1,9 +1,9 @@
 import socketio
-from discord_bot import AssettoStatsBot
 from models.lap_data import LapData
 from models.session_data import SessionData
 from models.player_data import PlayerData
 from datetime import datetime
+from dao import Dao
 
 assetto = socketio.Client()
 '''SocketIO client that connects to the assetto corsa server'''
@@ -40,15 +40,20 @@ def on_message(data):
 def on_lap_completed(lap_data):
     '''Saves data every time a lap is completed'''
     print("Lap Completed:")
+    print(lap_data)
     newline()
 
     car_id = lap_data["car_id"]
     lap = LapData(lap_data, current_clients[car_id])
 
+
     print("DO SOMETHING WITH LAP DATA")
-    print(lap.to_json())
+    print(lap)
     print(current_clients)
     newline()
+
+    dao = Dao("laps.json")
+    dao.save(lap.to_json())
 
 
 # Triggered when "get_car_info" is emitted
@@ -107,7 +112,7 @@ def on_player_leave(leave_data):
     session.session_end(end_time)
 
     print("DO SOMETHING WITH SESSION DATA")
-    print(session.to_json())
+    print(session)
     print(current_clients)
     newline()
 

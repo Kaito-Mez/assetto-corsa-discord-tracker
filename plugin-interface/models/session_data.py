@@ -22,6 +22,18 @@ class SessionData:
         self.car_id = session_data["car_id"]
         '''Player's car ID'''
 
+    def __str__(self):
+        '''Outputs this sessiondata as a json style string'''
+        self_dict = {
+            "player":self.player, 
+            "guid":self.guid,
+            "session_time":self.session_time,
+            "car":self.car,
+            "car_id":self.car_id,
+
+        }
+        return json.dumps(self_dict, indent=4)
+
     def update_car_info(self, json_data):
         '''Set data once the car has been queried'''
         self.player = json_data["driver_name"]
@@ -34,8 +46,10 @@ class SessionData:
 
         self.session_time = (self.end_time - self.start_time).total_seconds()
 
+
+
     def to_json(self):
-        '''Ouputs this sessiondata as a json style string'''
+        '''Ouputs this sessiondata as a serialized json object'''
         self_dict = {
             "player":self.player, 
             "guid":self.guid,
@@ -44,4 +58,4 @@ class SessionData:
             "car_id":self.car_id,
 
         }
-        return json.dumps(self_dict, indent=4)
+        return self_dict
