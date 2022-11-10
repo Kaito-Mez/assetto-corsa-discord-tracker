@@ -1,9 +1,11 @@
-import socketio
-from models.lap_data import LapData
-from models.session_data import SessionData
-from models.player_data import PlayerData
 from datetime import datetime
+
+import socketio
+
 from dao import Dao
+from models.lap_data import LapData
+from models.player_data import PlayerData
+from models.session_data import SessionData
 
 assetto = socketio.Client()
 '''SocketIO client that connects to the assetto corsa server'''
@@ -98,7 +100,10 @@ def on_player_join(join_data):
     new_session = SessionData(start_time, join_data)
     current_clients.update({new_session.car_id:new_session})
 
-    assetto.emit("get_car_info", new_session.car_id)
+    try:
+        assetto.emit("get_car_info", new_session.car_id)
+    except Exception as e:
+        print(e)
 
 @assetto.on("connection_closed")
 def on_player_leave(leave_data):
