@@ -134,3 +134,4 @@ dmypy.json
 ./data/*.json
 udp2ws/udp2ws
 udp2ws/udp2ws.ini
+database/laps.json
