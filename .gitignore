@@ -135,5 +135,4 @@ dmypy.json
 udp2ws/udp2ws
 udp2ws/udp2ws.ini
 database/laps.json
-database/laps.json
 database/sessions.json
