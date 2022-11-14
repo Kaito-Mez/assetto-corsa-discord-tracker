@@ -1,4 +1,6 @@
 import json
+import pandas as pd
+
 
 
 class Dao:
@@ -31,4 +33,8 @@ class Dao:
             db_string = json.loads(f)
         
         return db_string
+
+    def get_dataframe(self):
+        df = pd.read_json(self.filepath)
+        return df
     
