@@ -3,7 +3,7 @@ import json
 class LapData:
     '''Lap data info class'''
     
-    def __init__(self, json_lap, session_data) -> None:
+    def __init__(self, json_lap, session_data, session_type) -> None:
         lap_data = json_lap
 
         self.player = session_data.player
@@ -17,6 +17,9 @@ class LapData:
         #time in ms
         self.laptime = lap_data["laptime"]
         '''Laptime (milliseconds)'''
+
+        self.session = session_type[0]
+        '''What type of session it was'''
         
     def __str__(self):
         '''Outputs this lapdata as a serialized json style string'''
@@ -41,6 +44,6 @@ class LapData:
             "laptime":self.laptime,
             "car":self.car,
             "car_id":self.car_id,
-
+            "session":self.session
         }
         return self_dict

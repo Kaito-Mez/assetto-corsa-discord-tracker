@@ -46,7 +46,7 @@ def on_lap_completed(lap_data):
     newline()
 
     car_id = lap_data["car_id"]
-    lap = LapData(lap_data, current_clients[car_id])
+    lap = LapData(lap_data, current_clients[car_id], current_session)
 
 
     print("DO SOMETHING WITH LAP DATA")
@@ -119,6 +119,9 @@ def on_player_leave(leave_data):
     print("DO SOMETHING WITH SESSION DATA")
     print(session)
     print(current_clients)
+
+    dao = Dao("sessions.json")
+    dao.save(session.to_json())
     newline()
 
 
