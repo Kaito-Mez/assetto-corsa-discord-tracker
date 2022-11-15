@@ -6,6 +6,7 @@ from dao import Dao
 from models.lap_data import LapData
 from models.player_data import PlayerData
 from models.session_data import SessionData
+from time import sleep
 
 assetto = socketio.Client()
 '''SocketIO client that connects to the assetto corsa server'''
@@ -42,16 +43,10 @@ def on_message(data):
 def on_lap_completed(lap_data):
     '''Saves data every time a lap is completed'''
     print("Lap Completed:")
-    print(lap_data)
-    newline()
 
     car_id = lap_data["car_id"]
     lap = LapData(lap_data, current_clients[car_id], current_session)
-
-
-    print("DO SOMETHING WITH LAP DATA")
-    print(lap)
-    print(current_clients)
+    print(lap.to_json())
     newline()
 
     dao = Dao("laps.json")
@@ -83,10 +78,21 @@ def on_lap_split(data):
     newline()
 
 @assetto.on("end_session")
-def on_session_ends(data):
-    '''Doesnt work'''
+def on_end_sesion(data):
+    '''Only triggers when the server closes
+    fails if no write perms'''
     print("End session")
     print(data)
+    print(current_clients)
+    keys = []
+    for car_id in current_clients.keys():
+        keys.append(car_id)
+
+    sleep(30)
+    
+    for car_id in keys:
+        on_player_leave({"car_id":car_id})
+
     newline()
 
 @assetto.on("client_loaded")
