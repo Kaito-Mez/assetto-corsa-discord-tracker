@@ -29,6 +29,6 @@ class Dao:
         return db_string
 
     def get_dataframe(self):
-        df = pd.read_json(self.filepath)
+        df = pd.read_json(self.filepath, dtype={"guid":"int64"})
         return df
     

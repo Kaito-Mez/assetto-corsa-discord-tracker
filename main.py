@@ -45,7 +45,12 @@ def on_lap_completed(lap_data):
     print("Lap Completed:")
 
     car_id = lap_data["car_id"]
-    lap = LapData(lap_data, current_clients[car_id], current_session)
+    lap = LapData(
+        json_lap=lap_data, 
+        session_data=current_clients[car_id], 
+        session_type=current_session
+        )
+
     print(lap.to_json())
     newline()
 
@@ -88,7 +93,7 @@ def on_end_sesion(data):
     for car_id in current_clients.keys():
         keys.append(car_id)
 
-    sleep(30)
+    sleep(5)
     
     for car_id in keys:
         on_player_leave({"car_id":car_id})

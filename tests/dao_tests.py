@@ -1,4 +1,3 @@
-import pandas as pd
 
 def load_dataframe_test(dao):
     df = dao.get_dataframe()

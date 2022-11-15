@@ -26,10 +26,10 @@ class SessionData:
         '''Outputs this sessiondata as a json style string'''
         self_dict = {
             "player":self.player, 
-            "guid":self.guid,
-            "session_time":self.session_time,
+            "guid":int(self.guid),
+            "session_time":int(self.session_time),
             "car":self.car,
-            "car_id":self.car_id,
+            "car_id":int(self.car_id),
 
         }
         return json.dumps(self_dict, indent=4)
