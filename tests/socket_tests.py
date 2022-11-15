@@ -2,7 +2,7 @@ import random
 
 
 
-def run_lap_completed_test(on_session_start, on_player_join, on_car_info, on_lap_completed, on_player_leave):
+def run_lap_completed_test(on_session_start, on_player_join, on_car_info, on_lap_completed, on_player_leave, on_session_end):
     '''Pass on_lap_completed() as a parameter'''
 
     session_data = {'version': 4, 'session_index': 1, 'current_session_index': 1, 'session_count': 3, 'server_name': 'Project D Prototype x:Len7PR', 'track': 'ks_brands_hatch', 'track_config': 'indy', 'name': random.choice(["Qualification", "Practice", "Race"]), 
@@ -22,8 +22,11 @@ def run_lap_completed_test(on_session_start, on_player_join, on_car_info, on_lap
                     'laps': 0, 'completed': False}, {'car_id': 14, 'laptime': 999999999, 'laps': 0, 'completed': False}, {'car_id': 15, 'laptime': 999999999, 'laps': 0, 'completed': False}, {'car_id': 16, 'laptime': 999999999, 
                     'laps': 0, 'completed': False}]})
 
+    end_data = {"filename": None}
+
     on_session_start(session_data)
     on_player_join(join_data)
     on_car_info(car_data)
     on_lap_completed(lap_data)
-    on_player_leave(leave_data)
+    #on_player_leave(leave_data)
+    on_session_end(end_data)
