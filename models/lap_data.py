@@ -3,8 +3,12 @@ import json
 class LapData:
     '''Lap data info class'''
     
-    def __init__(self, json_lap, session_data, session_type) -> None:
-        lap_data = json_lap
+    def __init__(self, json_lap, session_data, session_type, **kwargs) -> None:
+
+
+        lap_data = kwargs.get("json_lap")
+        session_data = kwargs.get("session_data")
+        session_type = kwargs.get("session_type")
 
         self.player = session_data.player
         '''Player's name'''
@@ -22,7 +26,7 @@ class LapData:
         '''What type of session it was'''
         
     def __str__(self):
-        '''Outputs this lapdata as a serialized json style string'''
+        '''Outputs this lapdata as a = json style string'''
         
         self_dict = {
             "player":self.player, 
@@ -36,7 +40,7 @@ class LapData:
 
 
     def to_json(self):
-        '''Outputs this lapdata as a serialized json object'''
+        '''Outputs this lapdata as a json style object'''
         
         self_dict = {
             "player":self.player, 

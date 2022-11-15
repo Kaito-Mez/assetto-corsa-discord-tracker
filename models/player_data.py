@@ -42,7 +42,7 @@ class PlayerData:
 
 
     def to_json(self):
-        '''Output this playerdata as a serialized json object'''
+        '''Output this playerdata as a json style object'''
         self_dict = {
             "name":self.name, 
             "guid":self.guid,

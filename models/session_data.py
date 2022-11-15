@@ -49,7 +49,7 @@ class SessionData:
 
 
     def to_json(self):
-        '''Ouputs this sessiondata as a serialized json object'''
+        '''Ouputs this sessiondata as a json style object'''
         self_dict = {
             "player":self.player, 
             "guid":self.guid,
