@@ -19,7 +19,6 @@ def get_player_fastest_lap(guid) -> LapData or None:
 
     return fastest_lap
     
-
 def get_car_fastest_lap(car) -> LapData or None:
     '''Gets the fastest lap of specified car'''
 
@@ -57,9 +56,31 @@ def get_player_fastest_lap_in_car(guid, car) -> LapData:
 
     return fastest_lap
 
+def get_most_recent_lap():
+    '''Returns the most recent lap'''
+
+    dao = Dao("laps.json")
+    
+    all_laps = dao.get_dataframe()
+
+    most_recent = all_laps.iloc[-1].to_dict()
+
+    return LapData(json_lap_data = most_recent)
+
+def get_average_laptime():
+    '''Gets the average laptime of all laps'''
+
+    dao = Dao("laps.json")
+    all_laps = dao.get_dataframe()
+
+    mean = all_laps.laptime.mean()
+
+    return mean
 
 '''TESTS'''
 if __name__ == "__main__":
     print(get_player_fastest_lap(76561198249901870))
     print(get_car_fastest_lap("pschd_honda_integra_dc2_typer_1998"))
     print(get_player_fastest_lap_in_car(76561198249901870, "ks_toyota_supra_mkiv_tuned"))
+    print(get_most_recent_lap())
+    print(get_average_laptime())
