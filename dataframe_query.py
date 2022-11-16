@@ -8,6 +8,7 @@ def get_player_fastest_lap(guid) -> LapData or None:
 
     dao = Dao("laps.json")
     all_laps = dao.get_dataframe()
+    all_laps = all_laps[all_laps.session != "Practice"]
     player_laps = all_laps[all_laps.guid == guid]
     fastest_laps = player_laps[player_laps.laptime == player_laps.laptime.min()]
 
@@ -26,6 +27,7 @@ def get_car_fastest_lap(car) -> LapData or None:
 
     dao = Dao("laps.json")
     all_laps = dao.get_dataframe()
+    all_laps = all_laps[all_laps.session != "Practice"]
     car_laps = all_laps[all_laps.car == car]
     fastest_laps = car_laps[car_laps.laptime == car_laps.laptime.min()]
 
@@ -44,6 +46,7 @@ def get_player_fastest_lap_in_car(guid, car) -> LapData:
     
     dao = Dao("laps.json")
     all_laps = dao.get_dataframe()
+    all_laps = all_laps[all_laps.session != "Practice"]
     player_laps = all_laps[all_laps.guid == guid]
     car_laps = player_laps[player_laps.car == car]
     fastest_laps = car_laps[car_laps.laptime == car_laps.laptime.min()]
@@ -77,10 +80,22 @@ def get_average_laptime():
 
     return mean
 
+def get_all_players():
+    '''Returns all guids'''
+
+    dao = Dao("laps.json")
+
+    all_laps = dao.get_dataframe()
+
+    all_players = all_laps.guid.unique()
+    
+    return list(all_players)
+
 '''TESTS'''
 if __name__ == "__main__":
-    print(get_player_fastest_lap(76561198249901870))
-    print(get_car_fastest_lap("pschd_honda_integra_dc2_typer_1998"))
+    #print(get_player_fastest_lap(76561198249901871))
+    #print(get_car_fastest_lap("pschd_honda_integra_dc2_typer_1998"))
     print(get_player_fastest_lap_in_car(76561198249901870, "ks_toyota_supra_mkiv_tuned"))
-    print(get_most_recent_lap())
-    print(get_average_laptime())
+    #print(get_most_recent_lap())
+    #print(get_average_laptime())
+    #print(get_all_players())
