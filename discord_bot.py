@@ -1,135 +1,81 @@
-from discord.errors import ClientException, Forbidden
 from models.disc_gui import discordBook
+from dataframe_query import *
 import discord
-import asyncio
-import os
+import socketio
+from json import load
 
-class AssettoStatsBot(discord.Client):
+intents = discord.Intents.all()
+'''Discord intents'''
+client = discord.Client(intents=intents)
+'''Discord client'''
+socket = socketio.Client()
+'''Socket client'''
 
-    def __init__(self, intents):
-        self.directory = os.path.dirname(__file__)
-        self.servers = []
+channels = {}
+'''The text channels that the bot sends to'''
 
-        super().__init__(intents = intents)
+car_info = None
 
+racer_info = None
 
+'''Discord event handlers and other discord functions'''
 
-    async def on_message(self, message):
-        print("MESSAGE RECEIVED")
+@client.event
+async def on_ready():
+    print("Bot Online!")
+    print("Name: {}".format(client.user.name))
+    print("ID: {}".format(client.user.id))
+    print("Version: {}".format(discord.__version__))
+    print(discord.opus.is_loaded())
 
-        async def add_song(server, message):
-            server.add(message.content, message.author)
-            if not server.is_playing():
-                await self.handle_play_pause(server, message.author)
+def on_practice_start():
+    '''Sets up the server when practice session starts'''
+    print("Not Implemented")
 
-        if message.author == client.user:
-            return
-        server = self.get_server_from_channel_id(message.channel.id)
-        if server:
-            if message.channel.id == server.get_channel_id():
-                await asyncio.sleep(0.5)
-                await message.delete()
-                if server.vc:
-                    if server.is_member_in_call(message.author):
-                        await add_song(server, message)
+def on_qualification_start():
+    '''Sets up the server when qualification session staarts'''
+    print("Not Implemented")
 
-                else:
-                    if server.is_member_connected(message.author):
-                        await add_song(server, message)
+def on_race_start():
+    '''Sets up the server when race session starts'''
+    print("Not implemented")
 
-    async def on_raw_message_delete(self, payload):
-        print("on_raw_message_delete")
-        message_id = payload.message_id
-        channel_id = payload.channel_id
-        
-        server = self.get_server_from_channel_id(channel_id)
-        guild = client.get_guild(server.id)
-
-
-        server_message_id = server.book.message.id
-        if server_message_id == message_id:
-            self.servers.remove(server)
-            await asyncio.sleep(5)
-            await self._setup_guild(guild)
-    
-
-
-
-    async def on_ready(self):
-        for guild in client.guilds:
-            await self._setup_guild(guild)
-        
-        print("Bot Online!")
-        print("Name: {}".format(self.user.name))
-        print("ID: {}".format(self.user.id))
-        print("Version: {}".format(discord.__version__))
-        print(discord.opus.is_loaded())
-
-    #Respond to reacts to the message
-    async def on_raw_reaction_add(self, payload:discord.RawReactionActionEvent):
-        member = payload.member
-        emoji = payload.emoji
-        message_id = payload.message_id
-        channel_id = payload.channel_id
-        if client.user == member:
-            return
-
-        server = self.get_server_from_channel_id(channel_id)
-        if server:
-            book = server.book
-            result = await book.handle_react(emoji, member, message_id)
-            
-        else:
-            result = -1
-
-
-        if result == -1:
-            return
-        
-        elif result == 1:
-            await server.to_start()
-
-        elif result == 2:
-            await server.previous_audio()
-
-        elif result == 3:
-            await self.handle_play_pause(server, member)
-        
-        elif result == 4:
-            await server.next_audio()
-
-        elif result == 5:
-            await server.to_end()
-            
-        elif result == 6:
-            server.remove_song(server.current)
-
-        elif result == 7:
-            await server.stop_audio()
-
-        print("React result ", result)
-
-    async def on_voice_state_update(self, member, before, after):
-        if before.channel:
-            server = self.get_server_from_id(before.channel.guild.id)
-            if server:
-                if server.is_bot_alone():
-                    await server.stop_audio()
-
-
-
+'''Bot config functions'''
 
 def get_token():
-    with open("data/discordToken.txt", "r") as f:
+    with open("config/discordToken.txt", "r") as f:
         token = f.readline()
         return token
 
+def get_channels():
+    '''Loads the channels that the bot sends to''' 
+    with open("config/channels.json", "r") as f:
+        loaded_channels = load(f)
+
+    return loaded_channels
+
+
+'''Socket Event Handlers'''
+
+@socket.on("connect")
+def connect():
+    print("Client Connected to assetto")
+
+@socket.on("lap_completed")
+def on_lap(data):
+    print("Lap_completed not implemented")
+
+@socket.on("connection_closed")
+def on_connection_closed(data):
+    print("Lap_completed not implemented")
+
+@socket.on("end_session")
+def on_end_session(data):
+    print("On_end_session not implemented")
 
 if __name__ == "__main__":
-    intents = discord.Intents.all()
-    
-    client = MusicBot(intents=intents)
-    client.run(get_token())
+    url = "ws://127.0.0.1:30001"
 
-#Stop Button
-#
+    channels = get_channels()
+    socket.connect(url)
+    client.run(get_token())
