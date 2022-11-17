@@ -1,18 +1,22 @@
 from datetime import datetime
-
+from time import sleep
 import socketio
+from flask import Flask
+from flask_socketio import SocketIO
 
 from dao import Dao
 from models.lap_data import LapData
 from models.player_data import PlayerData
 from models.session_data import SessionData
-from time import sleep
 
 assetto = socketio.Client()
 '''SocketIO client that connects to the assetto corsa server'''
 
-#discord = AssettoStatsBot()
-'''The discord client'''
+discord_app = Flask(__name__)
+'''The app wrapper for the discord socket server'''
+
+discord = SocketIO(discord_app)
+'''The discord Socket server'''
 
 current_clients = {}
 '''Players currently connected to the server format {car_id:session_data}'''
@@ -21,7 +25,7 @@ current_session = []
 '''Practice, Qualification or Race'''
 
 '''
-Event Handlers
+Assetto Socket Event Handlers
 '''
 @assetto.event
 def connect():
@@ -157,9 +161,19 @@ def on_session_info(session_data):
     newline()
 
 
+'''Discord Socket Event Handlers'''
+
+@discord.on("connect")
+def connect():
+    '''On connection to the assetto server'''
+    print("Connected To discord")
+
+
+
 def connect(url):
     '''Connect to the plugin via socketio at url'''
     assetto.connect(url)
+    discord.run(discord_app, host='0.0.0.0', port=30001)
 
 def newline():
     print("####################################################################################")
