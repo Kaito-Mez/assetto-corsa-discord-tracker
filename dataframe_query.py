@@ -62,13 +62,23 @@ def get_player_fastest_lap_in_car(guid, car) -> LapData or None:
 def get_most_recent_lap():
     '''Returns the most recent lap'''
 
+    most_recent = None
+
     dao = Dao("laps.json")
     
     all_laps = dao.get_dataframe()
 
-    most_recent = all_laps.iloc[-1].to_dict()
+    try:
+        most_recent = all_laps.iloc[-1].to_dict()
+    except IndexError as e:
+        pass
+    
+    lap = None
 
-    return LapData(json_lap_data = most_recent)
+    if most_recent:
+        lap = LapData(json_lap_data = most_recent)
+        
+    return lap
 
 def get_average_laptime():
     '''Gets the average laptime of all laps'''
@@ -119,6 +129,17 @@ def get_car_playtime(car):
     car_sessions = all_sessions[all_sessions.car == car]
 
     return car_sessions.session_time.sum()
+
+def get_all_cars():
+    '''Returns all car names'''
+
+    dao = Dao("laps.json")
+
+    all_laps = dao.get_dataframe()
+
+    all_cars =  all_laps.car.unique()
+
+    return list(all_cars)
 
 '''TESTS'''
 if __name__ == "__main__":
