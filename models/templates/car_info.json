@@ -1,0 +1,42 @@
+[
+    {
+        "title": "Car Name",
+        "description": "",
+        "author": {
+            "name": "Car Info:"
+        },
+        "fields": [
+            {
+                "name": "Fastest Lap:",
+                "inline": true,
+                "value": "MM:SS.MS"
+            },
+            {
+                "name": "Lap Set By:",
+                "inline": true,
+                "value": "MM:SS.MS"
+            },
+            {
+                "name": "Total Race Time:",
+                "inline": false,
+                "value" : "HH:MM Hours"
+            }
+
+        ],
+        "color": 16767920,
+        "image": {
+            "url": null
+        },
+        "video": {
+            "url": null
+        },
+        "thumbnail": {
+            "url": "https://i.imgur.com/oJMY4AT.png"
+        },
+        "timestamp": null,
+        "url": "",
+        "reacts": [
+        ],
+        "footer":{"text":"Last Updated: "}
+    }
+]

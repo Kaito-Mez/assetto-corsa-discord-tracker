@@ -1,0 +1,36 @@
+[
+    {
+        "title": "Racer Name",
+        "description": "",
+        "author": {
+            "name": "Most Recent Lap:"
+        },
+        "fields": [
+            {
+                "name": "Car Name",
+                "inline": false,
+                "value": "MM:SS.MS"
+            },
+            {
+                "name": "Average Time:",
+                "inline": false,
+                "value": "MM:SS.MS"
+            }
+        ],
+        "color": 16767920,
+        "image": {
+            "url": null
+        },
+        "video": {
+            "url": null
+        },
+        "thumbnail": {
+            "url": "https://i.imgur.com/oJMY4AT.png"
+        },
+        "timestamp": null,
+        "url": "",
+        "reacts": [
+        ],
+        "footer":{"text":"Lap Date"}
+    }
+]
