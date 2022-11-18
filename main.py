@@ -28,7 +28,7 @@ current_session = []
 Assetto Socket Event Handlers
 '''
 @assetto.event
-def connect():
+def on_assetto_connect():
     '''Setup on connection to plugin'''
 
     print("connected ")
@@ -164,7 +164,7 @@ def on_session_info(session_data):
 '''Discord Socket Event Handlers'''
 
 @discord.on("connect")
-def connect():
+def on_disc_connect():
     '''On connection to the assetto server'''
     print("Connected To discord")
 
