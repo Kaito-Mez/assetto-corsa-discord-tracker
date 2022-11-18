@@ -136,3 +136,5 @@ udp2ws/udp2ws
 udp2ws/udp2ws.ini
 database/sessions.json
 database/laps.json
+
+.vscode/*
