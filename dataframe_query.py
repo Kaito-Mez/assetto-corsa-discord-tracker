@@ -133,21 +133,134 @@ def get_car_playtime(car):
 def get_all_cars():
     '''Returns all car names'''
 
+    dao = Dao("car_translate.json")
+
+    all_cars = dao.get_json()
+
+    return list(all_cars.keys())
+
+def get_car_name(car):
+    '''Return the actual name of a car based on its ID'''
+
+    dao = Dao("car_translate.json")
+    all_cars = dao.get_json()
+
+    return all_cars[car]
+
+def get_cars_ranked_by_laptime():
+    '''Return a list of cars from fastest laptime to slowest'''
+
+    def rule(lap:LapData):
+        return lap.laptime
+
+    all_cars = get_all_cars()
+
+    no_laps = []
+    ranked_laps = []
+
+    for car in all_cars:
+        fastest_lap = get_car_fastest_lap(car)
+        if fastest_lap:
+            ranked_laps.append(fastest_lap)
+        else:
+            no_laps.append(car)
+    ranked_laps.sort(key = rule)
+    
+    ranked_cars = []
+
+    for lap in ranked_laps:
+        ranked_cars.append(lap.car)
+
+    for car in no_laps:
+        ranked_cars.append(car)
+
+    return ranked_cars
+
+def get_player_name(guid):
+    '''returns a players current name using their guid'''
     dao = Dao("laps.json")
-
     all_laps = dao.get_dataframe()
+    player_laps = all_laps[all_laps.guid == guid]
 
-    all_cars =  all_laps.car.unique()
+    most_recent_name = player_laps.iloc[-1].player
 
-    return list(all_cars)
+    return most_recent_name
+
+def get_players_cars_ranked_by_playtime(guid):
+    '''Returns the name of the players cars from most played to least'''
+
+    def sort(time_car_pair):
+        return list(time_car_pair.keys())[0]
+
+
+    dao = Dao("sessions.json")
+    all_sessions = dao.get_dataframe()
+
+    player_sessions = all_sessions[all_sessions.guid == guid]
+
+    no_time = []
+    ranked_time = []
+
+    for car in get_all_cars():
+        time = player_sessions[player_sessions.car == car].session_time.sum()
+        if time == 0:
+            no_time.append(car)
+        else:
+            ranked_time.append({time:car})
+
+    ranked_time.sort(key=sort, reverse=True)
+
+    sorted_cars = []
+
+    for time in ranked_time:
+        sorted_cars.append(list(time.values())[0])
+    
+    for car in no_time:
+        sorted_cars.append(car)
+
+    return sorted_cars
+    
+def get_players_cars_ranked_by_laptime(guid):
+    '''Return a list of cars from fastest laptime to slowest for a player'''
+
+    def rule(lap:LapData):
+        return lap.laptime
+
+    all_cars = get_all_cars()
+
+    no_laps = []
+    ranked_laps = []
+
+    for car in all_cars:
+        fastest_lap = get_player_fastest_lap_in_car(guid, car)
+        if fastest_lap:
+            ranked_laps.append(fastest_lap)
+        else:
+            no_laps.append(car)
+    ranked_laps.sort(key = rule)
+    
+    ranked_cars = []
+
+    for lap in ranked_laps:
+        ranked_cars.append(lap.car)
+
+    for car in no_laps:
+        ranked_cars.append(car)
+
+    return ranked_cars
+
+
 
 '''TESTS'''
 if __name__ == "__main__":
     #print(get_player_fastest_lap(76561198249901871))
-    #print(get_car_fastest_lap("pschd_honda_integra_dc2_typer_1998"))
-    print(get_player_fastest_lap_in_car(76561198249901870, "bksy_nissan_skyline_r34_z_tune"))
+    #print(get_car_fastest_lap("nissan_300zx"))
+    #print(get_player_fastest_lap_in_car(76561198249901870, "bksy_nissan_skyline_r34_z_tune"))
     #print(get_most_recent_lap())
     #print(get_average_laptime())
     #print(get_all_players())
-    print(get_player_playtime_in_car(76561198249901870, "bksy_nissan_skyline_r34_z_tune"))
-    print(get_car_playtime("bksy_nissan_skyline_r34_z_tune"))
+    #print(get_player_playtime_in_car(76561198249901870, "bksy_nissan_skyline_r34_z_tune"))
+    #print(get_car_playtime("bksy_nissan_skyline_r34_z_tune"))
+    #print(get_all_cars())
+    #print(get_cars_ranked_by_laptime())
+    print(get_players_cars_ranked_by_playtime(76561198249901870))
