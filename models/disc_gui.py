@@ -8,11 +8,12 @@ class discordBook:
         self.client = client
 
         self.use_preset_reacts = use_preset_reacts
-        self.preset_reacts = ['🗑','⬅','➡','➡']
+        self.preset_reacts = ["<:change_filter:1044515659381477416>"]
 
         self.pages = {}
         self.reacts = {}
 
+        self.files = []
         #The message object once a page is sent
 
         #gonna be used for the multiple pages i think
@@ -116,7 +117,7 @@ class discordBook:
         #self.pages[page_num].update({page_num:modded_page})
 
         if permanent:
-            with open(self.data_file, 'w', encoding='utf8') as dumpfile:
+            with open(self.data_file, 'w+', encoding='utf8') as dumpfile:
 
                 data = []
                 pagenums = self.pages.keys()
@@ -152,7 +153,9 @@ class discordBook:
             self.message = message
         elif message == None:
             print("creating message")
-            self.message = await channel.send(embed = Embed.from_dict(self.pages[1]))
+            
+            self.message = await channel.send(embed = Embed.from_dict(self.pages[1]), files = self.files)
+
 
         self.current_page = 1
 
@@ -215,7 +218,7 @@ class discordBook:
     #used to refresh the discord after a pages data has been changed
     async def update_page(self):
         try:
-            await self.message.edit(embed=Embed.from_dict(self.pages[self.current_page]))
+            await self.message.edit(embed=Embed.from_dict(self.pages[self.current_page]), attachments=self.files)
             asyncio.ensure_future(self.update_reacts())
 
         except (AttributeError, discord.NotFound) as e:
@@ -227,7 +230,7 @@ class discordBook:
         try:
             #updates current reactions on the message
             async def get_current():
-                cur_message = discord.utils.get(await self.message.channel.history(limit=10).flatten(), id = self.message.id)
+                cur_message = self.message
                 cur_reactions = cur_message.reactions
                 return(cur_reactions)
 
@@ -303,7 +306,7 @@ class discordBook:
                 if str(emoji) == '⬅':
                     await self.cycle_page('prev')
 
-                elif str(emoji) == '➡':
+                elif str(emoji) == '<:change_filter:1044515659381477416>':
                     await self.cycle_page('next')
                     
                 elif str(emoji) == '🗑':
