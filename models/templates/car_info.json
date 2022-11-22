@@ -3,7 +3,7 @@
         "title": "Car Name",
         "description": "",
         "author": {
-            "name": "Car Info:"
+            "name": ""
         },
         "fields": [
             {
@@ -19,11 +19,11 @@
             {
                 "name": "Total Race Time:",
                 "inline": false,
-                "value" : "HH:MM Hours"
+                "value" : "HH:MM:SS"
             }
 
         ],
-        "color": 16767920,
+        "color": 16711680,
         "image": {
             "url": null
         },
