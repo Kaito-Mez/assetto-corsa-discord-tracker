@@ -136,5 +136,7 @@ udp2ws/udp2ws
 udp2ws/udp2ws.ini
 database/sessions.json
 database/laps.json
+database/cars/*
+models/templates/cars/*
 
 .vscode/*
