@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import asyncio
 from json import load
 
+
 intents = discord.Intents.all()
 '''Discord intents'''
 client = discord.Client(intents=intents)
@@ -35,11 +36,22 @@ async def on_ready():
 
     url = "ws://127.0.0.1:30001"
     await socket.connect(url)
-    
-    await update_activity_book()
-    await asyncio.sleep(5)
-    await update_activity_book()
 
+    await update_racer_books()
+
+@client.event   
+async def on_raw_reaction_add(payload:discord.RawReactionActionEvent):
+    member = payload.member
+    emoji = payload.emoji
+    message_id = payload.message_id    
+    
+    if client.user == member:
+        return
+
+    for book in books["racer_info"]:
+        if book.message.id == message_id:
+            await book.handle_react(emoji, member, message_id)
+    
 
 async def update_activity_book():
     '''Sets up and sends all relevant activity books to the server'''
@@ -48,19 +60,20 @@ async def update_activity_book():
         '''applies the mods to the page'''            
         fields = [
                 {
-                    "name": _convert_car_name(most_recent.car),
-                    "inline": False,
+                    "name": _format_car_name(most_recent.car),
+                    "inline": True,
                     "value": _format_ms(most_recent.laptime)
                 },
                 {
                     "name": "Average Time:",
-                    "inline": False,
+                    "inline": True,
                     "value": _format_ms(get_average_laptime())
                 }
             ]
 
-        date = "Lap Completed At: " + datetime.now().strftime("%H:%M:%S %d/%m/%Y")
-        activity_book.modify_page(1, False, fields = fields, title=most_recent.player, footer = {"text": date})
+        date = "Last Updated: " + datetime.now().strftime("%H:%M:%S %d/%m/%Y")
+        activity_book.files.append(discord.File(f"database/car_images/{most_recent.car}.jpg", filename=f"{most_recent.car}.jpg"))
+        activity_book.modify_page(1, False, fields = fields, title=_format_player_name(most_recent.guid), footer = {"text": date}, image = {"url":f"attachment://{most_recent.car}.jpg"})
         await activity_book.update_page()
     
 
@@ -83,8 +96,100 @@ async def update_activity_book():
         if most_recent:
             await apply_mod(activity_book)
 
+async def update_racer_books():
+    '''Sets up the racer books and sends/updates them'''
+    
+    async def apply_mod(racer_book: discordBook, guid):
+        cars_by_laptime = get_players_cars_ranked_by_laptime(guid)
+        cars_by_playtime = get_players_cars_ranked_by_playtime(guid)
+
+        fav_car = cars_by_playtime[0]
+        fastest_car = cars_by_laptime[0]
+
+        description1 = _format_car_name(fastest_car)
+        description2 = _format_car_name(fav_car)
+
+
+        fields1 = []
+        for car in cars_by_laptime:
+            field = {"name":_format_car_name(car), 'inline':True, "value":_format_ms(get_player_fastest_lap_in_car(guid, car))}
+            fields1.append(field)
+        
+        fields2 = []
+
+        for car in cars_by_playtime:
+            field = {"name":_format_car_name(car), 'inline':True, "value":_format_ms(get_player_playtime_in_car(guid, car))}
+            fields1.append(field)
+    
+
+
+    _, racer_info_channel, _, _ = _get_channel_objects()
+    car_book = discordBook(client, True, "models/templates/racer_info.json")
+    books["racer_info"] = [car_book]
+    await car_book.send_book(channel=racer_info_channel)
+    
+
 async def update_car_books():
     '''Sets up the car books and sends/updates them'''
+
+    async def apply_mod(car_book: discordBook, car):
+
+        lap = get_car_fastest_lap(car)
+        laptime = "N/A"
+        player = "N/A"
+        if lap:
+            laptime = _format_ms(lap.laptime)
+            player = _format_player_name(lap.guid)
+            
+        playtime = get_car_playtime(car)
+        fields = [
+            {
+                "name": "Fastest Lap:",
+                "inline": True,
+                "value": laptime
+            },
+            {
+                "name": "Lap Set By:",
+                "inline": True,
+                "value": player
+            },
+            {
+                "name": "Total Race Time:",
+                "inline": False,
+                "value" : _format_seconds(playtime)
+            }
+
+        ]
+        title = _format_car_name(car)
+        date = "Last Updated: " + datetime.now().strftime("%H:%M:%S %d/%m/%Y")
+        car_book.files.append(discord.File(f"database/car_images/{car}.jpg", filename=f"{car}.jpg"))
+        car_book.modify_page(1, False, fields=fields, title=title, footer={"text":date}, image={"url":f"attachment://{car}.jpg"})
+
+        await car_book.update_page()
+
+
+    cars = get_cars_ranked_by_laptime()
+
+    _, _, car_info_channel, _ = _get_channel_objects()
+
+    if "car_info" in books.keys():
+        car_info_books = books["car_info"]
+
+        for index, car in enumerate(cars):
+            await apply_mod(car_info_books[index], car)
+    
+    else:
+        car_info_books = []
+
+        for car in cars:
+            car_book = discordBook(client, False, "models/templates/car_info.json")
+            car_book.data_file = f"database/cars/{car}.json"
+            car_info_books.append(car_book)
+
+            await car_book.send_book(channel= car_info_channel)
+            await apply_mod(car_book, car)
+        
+    books["car_info"] = car_info_books
 
 
 
@@ -145,9 +250,17 @@ def _format_ms(ms):
     formatted = f"{minutes.zfill(2)}:{seconds.zfill(2)}.{ms.zfill(3)}"
     return formatted
 
+def _format_seconds(s):
 
-def _convert_car_name(name):
-    return "implement convert car name " + name
+    return str(timedelta(seconds=int(s)))
+
+
+def _format_car_name(name):
+    return get_car_name(name)
+
+def _format_player_name(guid):
+    return get_player_name(guid)
+
 
 def _get_hide_overwrite():
     '''returns an overwrite object that has no permissions'''
@@ -200,19 +313,35 @@ async def on_connect():
 
 
 @socket.on("lap_completed")
-async def on_lap(data):
+async def on_lap():
     '''On lap completed'''
     print("Lap_completed not implemented")
 
+    await update_activity_book()
+    await update_car_books()
+
 @socket.on("connection_closed")
-async def on_connection_closed(data):
+async def on_connection_closed():
     '''On player leaves'''
     print("Lap_completed not implemented")
 
+@socket.on("new_session")
+async def on_new_session(session_type):
+    '''When a new session starts'''
+    print("New session", session_type)
+    if session_type == "Practice":
+        await update_activity_book()
+        await set_practice_perms()
+    elif session_type == "Qualification":
+        await update_car_books()
+        await set_qual_perms()
+
 @socket.on("end_session")
-async def on_end_session(data):
+async def on_end_session():
     '''On server shutdown'''
     print("On_end_session not implemented")
+
+    await set_race_perms()
 
 if __name__ == "__main__":
 
