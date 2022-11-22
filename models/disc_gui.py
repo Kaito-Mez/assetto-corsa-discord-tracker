@@ -2,6 +2,7 @@ import discord
 from discord import Embed
 import asyncio
 import json
+from copy import deepcopy
 
 class discordBook:
     def __init__(self, client, use_preset_reacts, json_path=None):
@@ -188,9 +189,12 @@ class discordBook:
                 #checks if its the last page so it can loop to 1st
                 if temp_page > self.pg_count:
                     temp_page = 1
-                
-                await self.message.edit(embed= Embed.from_dict(self.pages[temp_page]))
                 self.current_page = temp_page
+                self.files = [
+                discord.File(self.files[0].fp.name, filename=self.files[0].filename),
+                discord.File(self.files[1].fp.name, filename=self.files[1].filename)
+                ]
+                await self.message.edit(embed= Embed.from_dict(self.pages[temp_page]), attachments = [self.files[self.current_page - 1]])
                 asyncio.ensure_future(self.update_reacts())
 
             except (AttributeError, discord.NotFound) as e:
@@ -204,8 +208,8 @@ class discordBook:
                 if temp_page < 1:
                     temp_page = self.pg_count
 
-                await self.message.edit(embed= Embed.from_dict(self.pages[temp_page]))
                 self.current_page = temp_page
+                await self.message.edit(embed= Embed.from_dict(self.pages[temp_page]), attachments = [self.files[self.current_page - 1]])
                 asyncio.ensure_future(self.update_reacts())
 
             except (AttributeError, discord.NotFound) as e:
@@ -218,7 +222,7 @@ class discordBook:
     #used to refresh the discord after a pages data has been changed
     async def update_page(self):
         try:
-            await self.message.edit(embed=Embed.from_dict(self.pages[self.current_page]), attachments=self.files)
+            await self.message.edit(embed=Embed.from_dict(self.pages[self.current_page]), attachments=[self.files[self.current_page-1]])
             asyncio.ensure_future(self.update_reacts())
 
         except (AttributeError, discord.NotFound) as e:

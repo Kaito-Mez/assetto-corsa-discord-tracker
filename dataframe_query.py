@@ -249,6 +249,34 @@ def get_players_cars_ranked_by_laptime(guid):
 
     return ranked_cars
 
+def get_players_by_most_playtime():
+    '''Returns players from most playtime to least'''
+
+    def sort(time_player_pair):
+        return list(time_player_pair.keys())[0]
+
+    no_time = []
+    ranked_time = []
+
+    for player in get_all_players():
+        time = get_player_playtime(player)
+        if time == 0:
+            no_time.append(player)
+        else:
+            ranked_time.append({time:player})
+
+    ranked_time.sort(key=sort, reverse=True)
+
+    sorted_players = []
+
+    for time in ranked_time:
+        sorted_players.append(list(time.values())[0])
+    
+    for car in no_time:
+        sorted_players.append(car)
+
+    return sorted_players
+    
 
 
 '''TESTS'''
