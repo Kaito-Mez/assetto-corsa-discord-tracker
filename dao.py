@@ -20,13 +20,20 @@ class Dao:
         with open(self.filepath, "w+") as f:
             json.dump(db_data, f, indent=4)
     
-    def get_json(self):
+    def __str__(self):
         '''Returns file as a json string'''
         
         with open(self.filepath, "r") as f:
             db_string = json.loads(f)
         
         return db_string
+
+    def get_json(self):
+        '''returns json dictionary '''
+        with open (self.filepath, "r") as f:
+            json_data = json.load(f)
+
+        return dict(json_data)
 
     def get_dataframe(self):
         df = pd.read_json(self.filepath, dtype={"guid":"int64"})
