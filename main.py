@@ -61,6 +61,8 @@ def on_lap_completed(lap_data):
     dao = Dao("laps.json")
     dao.save(lap.to_json())
 
+    discord.emit("lap_completed")
+
 
 # Triggered when "get_car_info" is emitted
 @assetto.on("car_info")
@@ -96,13 +98,13 @@ def on_end_sesion(data):
     keys = []
     for car_id in current_clients.keys():
         keys.append(car_id)
-
-    sleep(5)
     
     for car_id in keys:
-        on_player_leave({"car_id":car_id})
+        on_player_leave({"car_id":car_id}, remove=False)
 
     newline()
+
+    discord.emit("end_session")
 
 @assetto.on("client_loaded")
 def on_player_join(join_data):
@@ -121,14 +123,17 @@ def on_player_join(join_data):
         print(e)
 
 @assetto.on("connection_closed")
-def on_player_leave(leave_data):
+def on_player_leave(leave_data, remove = True):
     '''Finalizes session data when a player leaves'''
 
     print("Player Left")
     print(leave_data)
     newline()
     end_time = datetime.now()
-    session = current_clients.pop(leave_data["car_id"])
+    if remove:
+        session = current_clients.pop(leave_data["car_id"])
+    else:
+        session = current_clients[leave_data["car_id"]]
     session.session_end(end_time)
 
     print("DO SOMETHING WITH SESSION DATA")
@@ -138,6 +143,8 @@ def on_player_leave(leave_data):
     dao = Dao("sessions.json")
     dao.save(session.to_json())
     newline()
+
+    discord.emit("connection_closed")
 
 
 @assetto.on('new_session')
@@ -149,6 +156,8 @@ def on_session_start(session_data):
     current_session.append(session_data["name"])
     print(current_session)
     newline()
+
+    discord.emit("new_session", current_session[0])
 
 @assetto.on("session_info")
 def on_session_info(session_data):
