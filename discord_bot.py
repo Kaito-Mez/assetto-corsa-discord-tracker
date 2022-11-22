@@ -349,13 +349,14 @@ async def on_connect():
 
 
 @socket.on("lap_completed")
-async def on_lap():
+async def on_lap(session_type):
     '''On lap completed'''
     print("Lap_completed not implemented")
 
     await update_activity_book()
-    await update_car_books()
-    await update_racer_books()
+    if session_type != "Practice":
+        await update_car_books()
+        await update_racer_books()
 
 @socket.on("connection_closed")
 async def on_connection_closed():

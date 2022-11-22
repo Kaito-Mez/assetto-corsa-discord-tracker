@@ -61,7 +61,7 @@ def on_lap_completed(lap_data):
     dao = Dao("laps.json")
     dao.save(lap.to_json())
 
-    discord.emit("lap_completed")
+    discord.emit("lap_completed", current_session[0])
 
 
 # Triggered when "get_car_info" is emitted
