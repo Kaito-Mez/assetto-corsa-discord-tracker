@@ -30,11 +30,12 @@ async def on_ready():
     print("Version: {}".format(discord.__version__))
     print(discord.opus.is_loaded())
 
-    activity, race, car, results = _get_channel_objects()
-    await activity.purge()
-    await race.purge()
-    await car.purge()
-    await results.purge()
+    if books["c_setup"] == False:
+        activity, race, car, results = _get_channel_objects()
+        await activity.purge()
+        await race.purge()
+        await car.purge()
+        await results.purge()
 
     url = "ws://127.0.0.1:30001"
     await socket.connect(url)
