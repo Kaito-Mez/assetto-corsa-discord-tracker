@@ -10,7 +10,7 @@ if __name__ == "__main__":
         main.on_car_info, 
         main.on_lap_completed,
         main.on_player_leave,
-        main.on_end_sesion
+        main.on_end_session
         )
 
     dao = dao.Dao("laps.json")

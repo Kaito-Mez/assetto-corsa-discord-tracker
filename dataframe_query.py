@@ -8,15 +8,16 @@ def get_player_fastest_lap(guid) -> LapData or None:
 
     dao = Dao("laps.json")
     all_laps = dao.get_dataframe()
-    all_laps = all_laps[all_laps.session != "Practice"]
-    player_laps = all_laps[all_laps.guid == guid]
-    fastest_laps = player_laps[player_laps.laptime == player_laps.laptime.min()]
+    if all_laps.shape[0] > 0:
+        all_laps = all_laps[all_laps.session != "Practice"]
+        player_laps = all_laps[all_laps.guid == guid]
+        fastest_laps = player_laps[player_laps.laptime == player_laps.laptime.min()]
 
-    try:
-        fastest_lap_df = fastest_laps.iloc[0].to_dict()
-        fastest_lap = LapData(json_lap_data = fastest_lap_df)
-    except IndexError as e:
-        pass
+        try:
+            fastest_lap_df = fastest_laps.iloc[0].to_dict()
+            fastest_lap = LapData(json_lap_data = fastest_lap_df)
+        except IndexError as e:
+            pass
 
     return fastest_lap
     
@@ -27,15 +28,18 @@ def get_car_fastest_lap(car) -> LapData or None:
 
     dao = Dao("laps.json")
     all_laps = dao.get_dataframe()
-    all_laps = all_laps[all_laps.session != "Practice"]
-    car_laps = all_laps[all_laps.car == car]
-    fastest_laps = car_laps[car_laps.laptime == car_laps.laptime.min()]
 
-    try:
-        fastest_lap_df = fastest_laps.iloc[0].to_dict()
-        fastest_lap = LapData(json_lap_data = fastest_lap_df)
-    except IndexError as e:
-        pass
+    if all_laps.shape[0] > 0:
+
+        all_laps = all_laps[all_laps.session != "Practice"]
+        car_laps = all_laps[all_laps.car == car]
+        fastest_laps = car_laps[car_laps.laptime == car_laps.laptime.min()]
+
+        try:
+            fastest_lap_df = fastest_laps.iloc[0].to_dict()
+            fastest_lap = LapData(json_lap_data = fastest_lap_df)
+        except IndexError as e:
+            pass
 
     return fastest_lap
 
@@ -46,16 +50,17 @@ def get_player_fastest_lap_in_car(guid, car) -> LapData or None:
     
     dao = Dao("laps.json")
     all_laps = dao.get_dataframe()
-    all_laps = all_laps[all_laps.session != "Practice"]
-    player_laps = all_laps[all_laps.guid == guid]
-    car_laps = player_laps[player_laps.car == car]
-    fastest_laps = car_laps[car_laps.laptime == car_laps.laptime.min()]
+    if all_laps.shape[0] > 0:
+        all_laps = all_laps[all_laps.session != "Practice"]
+        player_laps = all_laps[all_laps.guid == guid]
+        car_laps = player_laps[player_laps.car == car]
+        fastest_laps = car_laps[car_laps.laptime == car_laps.laptime.min()]
 
-    try:
-        fastest_lap_df = fastest_laps.iloc[0].to_dict()
-        fastest_lap = LapData(json_lap_data = fastest_lap_df)
-    except IndexError as e:
-        pass
+        try:
+            fastest_lap_df = fastest_laps.iloc[0].to_dict()
+            fastest_lap = LapData(json_lap_data = fastest_lap_df)
+        except IndexError as e:
+            pass
 
     return fastest_lap
 
@@ -63,21 +68,22 @@ def get_most_recent_lap():
     '''Returns the most recent lap'''
 
     most_recent = None
+    lap = None
 
     dao = Dao("laps.json")
     
     all_laps = dao.get_dataframe()
 
-    try:
-        most_recent = all_laps.iloc[-1].to_dict()
-    except IndexError as e:
-        pass
-    
-    lap = None
-
-    if most_recent:
-        lap = LapData(json_lap_data = most_recent)
+    if all_laps.shape[0] > 0:
+        try:
+            most_recent = all_laps.iloc[-1].to_dict()
+        except IndexError as e:
+            pass
         
+
+        if most_recent:
+            lap = LapData(json_lap_data = most_recent)
+            
     return lap
 
 def get_average_laptime():
@@ -97,18 +103,27 @@ def get_all_players():
 
     all_laps = dao.get_dataframe()
 
-    all_players = all_laps.guid.unique()
+    all_players = []
+
+    if all_laps.shape[0] > 0:
+        all_registered = all_laps.guid.unique()
+
+        for registered in all_registered:
+            all_players.append(registered)
     
-    return list(all_players)
+    return all_players
 
 def get_player_playtime(guid):
     '''Gets a player's total playtime on the server in seconds'''
 
     dao = Dao("sessions.json")
     all_sessions = dao.get_dataframe()
-    player_sessions = all_sessions[all_sessions.guid == guid]
+    total_playtime = 0
+    if all_sessions.shape[0] > 0:
 
-    total_playtime = player_sessions.session_time.sum()
+        player_sessions = all_sessions[all_sessions.guid == guid]
+
+        total_playtime = player_sessions.session_time.sum()
 
     return total_playtime
 
@@ -117,18 +132,28 @@ def get_player_playtime_in_car(guid, car):
 
     dao = Dao("sessions.json")
     all_sessions = dao.get_dataframe()
-    player_sessions = all_sessions[all_sessions.guid == guid]
-    car_sessions = player_sessions[player_sessions.car == car]
 
-    return car_sessions.session_time.sum()
+    total_time = 0
+
+    if all_sessions.shape[0] > 0:
+
+        player_sessions = all_sessions[all_sessions.guid == guid]
+        car_sessions = player_sessions[player_sessions.car == car]
+        total_time = car_sessions.session_time.sum()
+
+    return total_time
 
 def get_car_playtime(car):
     '''Gets the total playtime of a car regardless of player'''
     dao = Dao("sessions.json")
     all_sessions = dao.get_dataframe()
-    car_sessions = all_sessions[all_sessions.car == car]
+    session_time = 0
 
-    return car_sessions.session_time.sum()
+    if all_sessions.shape[0] > 0:
+        car_sessions = all_sessions[all_sessions.car == car]
+        session_time = car_sessions.session_time.sum()
+
+    return session_time
 
 def get_all_cars():
     '''Returns all car names'''
@@ -173,7 +198,7 @@ def get_cars_ranked_by_laptime():
 
     for car in no_laps:
         ranked_cars.append(car)
-
+    
     return ranked_cars
 
 def get_player_name(guid):
@@ -181,7 +206,6 @@ def get_player_name(guid):
     dao = Dao("laps.json")
     all_laps = dao.get_dataframe()
     player_laps = all_laps[all_laps.guid == guid]
-
     most_recent_name = player_laps.iloc[-1].player
 
     return most_recent_name
@@ -196,28 +220,31 @@ def get_players_cars_ranked_by_playtime(guid):
     dao = Dao("sessions.json")
     all_sessions = dao.get_dataframe()
 
-    player_sessions = all_sessions[all_sessions.guid == guid]
+    if all_sessions.shape[0] > 0:
 
-    no_time = []
-    ranked_time = []
+        player_sessions = all_sessions[all_sessions.guid == guid]
 
-    for car in get_all_cars():
-        time = player_sessions[player_sessions.car == car].session_time.sum()
-        if time == 0:
-            no_time.append(car)
-        else:
-            ranked_time.append({time:car})
+        no_time = []
+        ranked_time = []
 
-    ranked_time.sort(key=sort, reverse=True)
+        for car in get_all_cars():
+            time = player_sessions[player_sessions.car == car].session_time.sum()
+            if time == 0:
+                no_time.append(car)
+            else:
+                ranked_time.append({time:car})
 
-    sorted_cars = []
+        ranked_time.sort(key=sort, reverse=True)
 
-    for time in ranked_time:
-        sorted_cars.append(list(time.values())[0])
-    
-    for car in no_time:
-        sorted_cars.append(car)
+        sorted_cars = []
 
+        for time in ranked_time:
+            sorted_cars.append(list(time.values())[0])
+        
+        for car in no_time:
+            sorted_cars.append(car)
+    else:
+        sorted_cars = get_all_cars()
     return sorted_cars
     
 def get_players_cars_ranked_by_laptime(guid):
@@ -276,7 +303,29 @@ def get_players_by_most_playtime():
         sorted_players.append(car)
 
     return sorted_players
-    
+
+def get_race_results():
+    '''Returns the race results'''
+
+    dao = Dao("laps.json")
+    results = dao.get_dataframe()
+
+    race_results = []
+
+    if results.shape[0] > 0:
+        race_laps = results[results.session == "Race"]
+
+        for i in range(race_laps.shape[0]):
+            
+            lap_dict = race_laps.iloc[i].to_dict()
+
+            lap = LapData(json_lap_data = lap_dict)
+            race_results.append(lap)
+
+    return race_results
+
+
+
 
 
 '''TESTS'''
@@ -290,5 +339,5 @@ if __name__ == "__main__":
     #print(get_player_playtime_in_car(76561198249901870, "bksy_nissan_skyline_r34_z_tune"))
     #print(get_car_playtime("bksy_nissan_skyline_r34_z_tune"))
     #print(get_all_cars())
-    #print(get_cars_ranked_by_laptime())
-    print(get_players_cars_ranked_by_playtime(76561198249901870))
+    print(get_race_results())
+    #print(get_all_cars())

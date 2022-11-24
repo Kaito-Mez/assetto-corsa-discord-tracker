@@ -17,7 +17,7 @@ socket = socketio.AsyncClient()
 channels = {}
 '''The text channels that the bot sends to'''
 
-books = {}
+books = {"a_setup":False, "c_setup":False, "r_setup":False}
 '''The discord books that are messaged to the server'''
 
 '''Discord event handlers and other discord functions'''
@@ -30,11 +30,16 @@ async def on_ready():
     print("Version: {}".format(discord.__version__))
     print(discord.opus.is_loaded())
 
+    activity, race, car, results = _get_channel_objects()
+    await activity.purge()
+    await race.purge()
+    await car.purge()
+    await results.purge()
+
     url = "ws://127.0.0.1:30001"
     await socket.connect(url)
 
-    await update_racer_books()
-
+    
 @client.event   
 async def on_raw_reaction_add(payload:discord.RawReactionActionEvent):
     member = payload.member
@@ -48,6 +53,32 @@ async def on_raw_reaction_add(payload:discord.RawReactionActionEvent):
         if book.message.id == message_id:
             await book.handle_react(emoji, member, message_id)
     
+async def send_results_book():
+    '''Sends the results information'''
+    async def apply_mod(results_book):
+        '''applies the mods to the page'''            
+        fields = []
+
+        results = get_race_results()
+
+        winning_car = results[0].car
+
+        for result in results:
+            field = {"name":_format_player_name(result.guid), "inline":True, "value":_format_ms(result.laptime)}
+            fields.append(field)
+        date = "Last Updated: " + datetime.now().strftime("%H:%M:%S %d/%m/%Y")
+        results_book.files = [(discord.File(f"database/car_images/{winning_car}.jpg", filename=f"{winning_car}.jpg"))]
+        results_book.modify_page(1, False, fields = fields,  footer = {"text": date}, description = _format_player_name(results[0].guid), image = {"url":f"attachment://{winning_car}.jpg"})
+        await results_book.update_page()
+
+    _, _, _, results = _get_channel_objects()
+
+
+    activity_book = discordBook(client, False, "models/templates/race_results.json")
+    await activity_book.send_book(channel=results)
+
+    await apply_mod(activity_book)
+        
 
 async def update_activity_book():
     '''Sets up and sends all relevant activity books to the server'''
@@ -68,7 +99,7 @@ async def update_activity_book():
             ]
 
         date = "Last Updated: " + datetime.now().strftime("%H:%M:%S %d/%m/%Y")
-        activity_book.files.append(discord.File(f"database/car_images/{most_recent.car}.jpg", filename=f"{most_recent.car}.jpg"))
+        activity_book.files = [(discord.File(f"database/car_images/{most_recent.car}.jpg", filename=f"{most_recent.car}.jpg"))]
         activity_book.modify_page(1, False, fields = fields, title=_format_player_name(most_recent.guid), footer = {"text": date}, image = {"url":f"attachment://{most_recent.car}.jpg"})
         await activity_book.update_page()
     
@@ -77,20 +108,24 @@ async def update_activity_book():
 
     activity, _, _, _ = _get_channel_objects()
 
-    #first time setup
+    
     if "activity" in books.keys():
         activity_book = books["activity"]
         if most_recent:
             await apply_mod(activity_book)
-
-    #update
-    else:
-        activity_book = discordBook(client, False, "models/templates/most_recent_lap.json")   
         books["activity"] = activity_book
+
+    
+    elif not books["a_setup"]:
+        books["a_setup"] = True
+        activity_book = discordBook(client, False, "models/templates/most_recent_lap.json")
         await activity_book.send_book(channel=activity)
+        books["activity"] = activity_book
 
         if most_recent:
             await apply_mod(activity_book)
+        
+        books["a_setup"] = False
 
 async def update_racer_books():
     '''Sets up the racer books and sends/updates them'''
@@ -113,19 +148,20 @@ async def update_racer_books():
                 laptime = _format_ms(laptime.laptime)
             else: 
                 laptime = "N/A"
-            field = {"name":_format_car_name(car), 'inline':True, "value":laptime}
+            field = {"name":_format_car_name(car) + ":", 'inline':True, "value":laptime}
             fields1.append(field)
         
         fields2 = []
 
         for car in cars_by_playtime:
-            field = {"name":_format_car_name(car), 'inline':True, "value":_format_ms(get_player_playtime_in_car(guid, car))}
+            field = {"name":_format_car_name(car) + ":", 'inline':True, "value":_format_seconds(get_player_playtime_in_car(guid, car))}
             fields2.append(field)
         
 
         author = {"name":_format_player_name(guid)}
 
         date = "Last Updated: " + datetime.now().strftime("%H:%M:%S %d/%m/%Y")
+        racer_book.files = []
         racer_book.files.append(discord.File(f"database/car_images/{fastest_car}.jpg", filename=f"{fastest_car}.jpg"))
         racer_book.files.append(discord.File(f"database/car_images/{fav_car}.jpg", filename=f"{fav_car}.jpg"))
         racer_book.modify_page(1, False, fields=fields1, description = description1, footer={"text":date}, image={"url":f"attachment://{fastest_car}.jpg"}, author=author)
@@ -140,27 +176,34 @@ async def update_racer_books():
     if "racer_info" in books.keys():
         racer_info_books = books["racer_info"]
 
-        if len(books["racer_info"] != len(get_all_players())):
+        print(len(books["racer_info"]), len(get_all_players()))
+        if len(books["racer_info"]) != len(get_all_players()):
             num = len(get_all_players()) - len(books["racer_info"])
-            for i in range(num):
+            for _ in range(num):
                 racer_book = discordBook(client, True, "models/templates/racer_info.json")
+                await racer_book.send_book(channel= racer_info_channel)
                 racer_info_books.append(racer_book)
 
 
         for index, player in enumerate(get_players_by_most_playtime()):
             await apply_mod(racer_info_books[index], player)
+        
+        
+        books["racer_info"] = racer_info_books
     
-    else:
+    elif not books["r_setup"]:
+        books["r_setup"] = True
         racer_info_books = []
-
+        books["racer_info"] = racer_info_books
         for player in get_all_players():
             racer_book = discordBook(client, True, "models/templates/racer_info.json")
             racer_info_books.append(racer_book)
 
             await racer_book.send_book(channel= racer_info_channel)
             await apply_mod(racer_book, player)
-        
-    books["racer_info"] = racer_info_books
+        books["r_setup"] = False
+        if racer_info_books != []:
+            books["racer_info"] = racer_info_books
 
 
     
@@ -198,7 +241,7 @@ async def update_car_books():
         ]
         title = _format_car_name(car)
         date = "Last Updated: " + datetime.now().strftime("%H:%M:%S %d/%m/%Y")
-        car_book.files.append(discord.File(f"database/car_images/{car}.jpg", filename=f"{car}.jpg"))
+        car_book.files = [(discord.File(f"database/car_images/{car}.jpg", filename=f"{car}.jpg"))]
         car_book.modify_page(1, False, fields=fields, title=title, footer={"text":date}, image={"url":f"attachment://{car}.jpg"})
 
         await car_book.update_page()
@@ -213,10 +256,12 @@ async def update_car_books():
 
         for index, car in enumerate(cars):
             await apply_mod(car_info_books[index], car)
+        
+        books["car_info"] = car_info_books
     
-    else:
+    elif not books["c_setup"]:
+        books["c_setup"] = True
         car_info_books = []
-
         for car in cars:
             car_book = discordBook(client, False, "models/templates/car_info.json")
             car_book.data_file = f"database/cars/{car}.json"
@@ -224,8 +269,8 @@ async def update_car_books():
 
             await car_book.send_book(channel= car_info_channel)
             await apply_mod(car_book, car)
-        
-    books["car_info"] = car_info_books
+        books["c_setup"] = False
+        books["car_info"] = car_info_books
 
 
 
@@ -348,20 +393,22 @@ async def on_connect():
     print("Client Connected to assetto")
 
 
+
 @socket.on("lap_completed")
 async def on_lap(session_type):
     '''On lap completed'''
-    print("Lap_completed not implemented")
 
     await update_activity_book()
     if session_type != "Practice":
-        await update_car_books()
         await update_racer_books()
+        await update_car_books()
 
 @socket.on("connection_closed")
-async def on_connection_closed():
+async def on_connection_closed(session_type):
     '''On player leaves'''
-    print("Lap_completed not implemented")
+    if session_type != "Practice":
+        await update_racer_books()
+        await update_car_books()
 
 @socket.on("new_session")
 async def on_new_session(session_type):
@@ -370,7 +417,9 @@ async def on_new_session(session_type):
     if session_type == "Practice":
         await update_activity_book()
         await set_practice_perms()
-    elif session_type == "Qualification":
+    else:
+        await update_activity_book()
+        await update_racer_books()
         await update_car_books()
         await set_qual_perms()
 
@@ -378,7 +427,7 @@ async def on_new_session(session_type):
 async def on_end_session():
     '''On server shutdown'''
     print("On_end_session not implemented")
-
+    await send_results_book()
     await set_race_perms()
 
 if __name__ == "__main__":

@@ -3,10 +3,10 @@ from time import sleep
 import socketio
 from flask import Flask
 from flask_socketio import SocketIO
-
+from json import loads
 from dao import Dao
 from models.lap_data import LapData
-from models.player_data import PlayerData
+from models.race_data import RaceData
 from models.session_data import SessionData
 
 assetto = socketio.Client()
@@ -89,22 +89,22 @@ def on_lap_split(data):
     newline()
 
 @assetto.on("end_session")
-def on_end_sesion(data):
+def on_end_session(filepath):
     '''Only triggers when the server closes
     fails if no write perms'''
     print("End session")
-    print(data)
+    print(filepath)
     print(current_clients)
-    keys = []
-    for car_id in current_clients.keys():
-        keys.append(car_id)
-    
-    for car_id in keys:
-        on_player_leave({"car_id":car_id}, remove=False)
-
-    newline()
-
-    discord.emit("end_session")
+    if current_session[0] == "Race":
+        keys = []
+        for car_id in current_clients.keys():
+            keys.append(car_id)
+        
+        for car_id in keys:
+            on_player_leave({"car_id":car_id}, remove=False)
+        
+        discord.emit("end_session")
+        print("emmitted")
 
 @assetto.on("client_loaded")
 def on_player_join(join_data):
@@ -144,7 +144,7 @@ def on_player_leave(leave_data, remove = True):
     dao.save(session.to_json())
     newline()
 
-    discord.emit("connection_closed")
+    discord.emit("connection_closed", current_session[0])
 
 
 @assetto.on('new_session')
@@ -153,7 +153,9 @@ def on_session_start(session_data):
     print("Start session")
     print(session_data)
     current_session.clear()
-    current_session.append(session_data["name"])
+    sessions = ["Practice", "Qualification", "Race"]
+    
+    current_session.append(sessions[session_data["current_session_index"]])
     print(current_session)
     newline()
 
@@ -169,6 +171,8 @@ def on_session_info(session_data):
     print(current_session)
     newline()
 
+    on_session_start(session_data)
+
 
 '''Discord Socket Event Handlers'''
 
@@ -176,7 +180,7 @@ def on_session_info(session_data):
 def on_disc_connect():
     '''On connection to the assetto server'''
     print("Connected To discord")
-
+    assetto.emit("get_session_info")
 
 
 def connect(url):
@@ -191,5 +195,4 @@ def newline():
 
 if __name__ == "__main__":
     url = "http://192.168.1.200:30000"
-
     connect(url)

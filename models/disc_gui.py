@@ -150,10 +150,8 @@ class discordBook:
             await self.unsend_book()
         
         if message != None:
-            print("attaching message")
             self.message = message
         elif message == None:
-            print("creating message")
             
             self.message = await channel.send(embed = Embed.from_dict(self.pages[1]), files = self.files)
 

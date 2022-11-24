@@ -1,0 +1,36 @@
+[
+    {
+        "title": "Winner:",
+        "description": "Winner Name",
+        "author": {
+            "name": "Race Results:"
+        },
+        "fields": [
+            {
+                "name": "Car Name",
+                "inline": true,
+                "value": "MM:SS.MS"
+            },
+            {
+                "name": "Car Name",
+                "inline": true,
+                "value": "MM:SS.MS"
+            }
+        ],
+        "color": 16711680,
+        "image": {
+            "url": null
+        },
+        "video": {
+            "url": null
+        },
+        "thumbnail": {
+            "url": "https://i.imgur.com/oJMY4AT.png"
+        },
+        "timestamp": null,
+        "url": "",
+        "reacts": [
+        ],
+        "footer":{"text":"Lap Date"}
+    }
+]

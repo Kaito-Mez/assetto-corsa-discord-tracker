@@ -140,3 +140,5 @@ database/cars/*
 models/templates/cars/*
 
 .vscode/*
+
+results/*

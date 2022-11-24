@@ -11,7 +11,6 @@ class Dao:
 
     def save(self, json_data):
         '''Saves object to opened file'''
-        print(self.filepath)
         with open(self.filepath, "r") as f:
             db_string = f.read()
             db_data = json.loads(db_string)
@@ -34,6 +33,13 @@ class Dao:
             json_data = json.load(f)
 
         return dict(json_data)
+
+    def get_json_list(self):
+        '''returns json list'''
+        with open (self.filepath, "r") as f:
+            json_data = json.load(f)
+
+        return list(json_data)
 
     def get_dataframe(self):
         df = pd.read_json(self.filepath, dtype={"guid":"int64"})
