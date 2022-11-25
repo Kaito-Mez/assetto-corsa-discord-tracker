@@ -324,6 +324,34 @@ def get_race_results():
 
     return race_results
 
+def get_players_by_fastest_lap():
+    
+    def sort(time_player_pair):
+        return list(time_player_pair.keys())[0]
+
+    ranked = []
+    no_time = []
+    players = get_all_players()
+
+    for player in players:
+        time = get_player_fastest_lap(player).laptime
+        if time:
+            ranked.append({time:player})
+
+        else:
+            no_time.append(player)
+
+    
+    ranked.sort(key=sort)
+
+    sorted = []
+
+    for time in ranked:
+        sorted.append(list(time.values())[0])
+    for player in no_time:
+        sorted.append(player)
+
+    return sorted
 
 
 
@@ -339,5 +367,7 @@ if __name__ == "__main__":
     #print(get_player_playtime_in_car(76561198249901870, "bksy_nissan_skyline_r34_z_tune"))
     #print(get_car_playtime("bksy_nissan_skyline_r34_z_tune"))
     #print(get_all_cars())
-    print(get_race_results())
+    #print(get_race_results())
     #print(get_all_cars())
+
+    print(get_players_by_fastest_lap())

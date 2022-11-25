@@ -130,8 +130,8 @@
         "footer":{"text":"Last Updated: "}
     },
     {
-        "title": "```Favourite Car:```",
-        "description": "> Favourite Car name",
+        "title": "> Favourite Car:",
+        "description": "Favourite Car name",
         "author": {
             "name": "Racer Name"
         },

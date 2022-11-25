@@ -186,7 +186,7 @@ async def update_racer_books():
                 racer_info_books.append(racer_book)
 
 
-        for index, player in enumerate(get_players_by_most_playtime()):
+        for index, player in enumerate(get_players_by_fastest_lap()):
             await apply_mod(racer_info_books[index], player)
         
         
@@ -196,7 +196,7 @@ async def update_racer_books():
         books["r_setup"] = True
         racer_info_books = []
         books["racer_info"] = racer_info_books
-        for player in get_all_players():
+        for player in get_players_by_fastest_lap():
             racer_book = discordBook(client, True, "models/templates/racer_info.json")
             racer_info_books.append(racer_book)
 
