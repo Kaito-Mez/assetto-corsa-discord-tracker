@@ -1,1 +1,0 @@
-Put udp2ws binary and configured udp2ws.ini in this folder
