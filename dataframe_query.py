@@ -334,8 +334,9 @@ def get_players_by_fastest_lap():
     players = get_all_players()
 
     for player in players:
-        time = get_player_fastest_lap(player).laptime
+        time = get_player_fastest_lap(player)
         if time:
+            time = time.laptime
             ranked.append({time:player})
 
         else:
