@@ -8,6 +8,7 @@ from dao import Dao
 from models.lap_data import LapData
 from models.race_data import RaceData
 from models.session_data import SessionData
+from rcon.source import Client as rconClient
 
 assetto = socketio.Client()
 '''SocketIO client that connects to the assetto corsa server'''
@@ -32,11 +33,9 @@ def connect():
     '''Setup on connection to plugin'''
 
     print("connected ")
-    assetto.emit("authenticate", "Puddlefish1!")
+    assetto.emit("authenticate", get_password())
     assetto.emit("get_session_info")
     assetto.emit("broadcast_message", "UDP Manager Connected")
-    assetto.emit("admin_command", "/admin Puddlefish1!")
-    assetto.emit("broadcast_message", "/set Server.Name PLEASE")
 
 @assetto.on("chat")
 def on_message(data):
@@ -160,6 +159,17 @@ def on_session_start(session_data):
     current_session.append(sessions[session_data["current_session_index"]])
     print(current_session)
     newline()
+
+    if (current_session[0] != "Practice"):
+        with rconClient('192.168.1.200', 8006, passwd=get_password()) as rcon_client:
+            responses = []
+            responses.append(rcon_client.run('set', 'Extra.AiParams.PlayerRadiusMeters', '0'))
+            responses.append(rcon_client.run('set', 'Extra.AiParams.MinSpawnProtectionTimeSeconds', '0'))
+            responses.append(rcon_client.run('set', 'Extra.AiParams.MaxSpawnProtectionTimeSeconds', '0'))
+            responses.append(rcon_client.run('set', 'Extra.AiParams.MaxAiTargetCount', '0'))
+            responses.append(rcon_client.run('set', 'Extra.AiParams.AiPerPlayerTargetCount', '0'))
+            print(responses)
+
     discord.emit("new_session", current_session[0])
 
 @assetto.on("session_info")
@@ -192,7 +202,10 @@ def connect_sockets(url):
 def newline():
     print("####################################################################################")
 
-
+def get_password():
+    '''Gets the server password'''
+    with open("./config/serverPassword.txt", "r") as f:
+        return f.readline()
 
 if __name__ == "__main__":
     url = "http://192.168.1.200:30000"
