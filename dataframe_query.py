@@ -9,7 +9,7 @@ def get_player_fastest_lap(guid) -> LapData or None:
     dao = Dao("laps.json")
     all_laps = dao.get_dataframe()
     if all_laps.shape[0] > 0:
-        all_laps = all_laps[all_laps.session != "Practice"]
+        #all_laps = all_laps[all_laps.session != "Practice"]
         player_laps = all_laps[all_laps.guid == guid]
         fastest_laps = player_laps[player_laps.laptime == player_laps.laptime.min()]
 
@@ -31,7 +31,7 @@ def get_car_fastest_lap(car) -> LapData or None:
 
     if all_laps.shape[0] > 0:
 
-        all_laps = all_laps[all_laps.session != "Practice"]
+        #all_laps = all_laps[all_laps.session != "Practice"]
         car_laps = all_laps[all_laps.car == car]
         fastest_laps = car_laps[car_laps.laptime == car_laps.laptime.min()]
 
@@ -51,7 +51,7 @@ def get_player_fastest_lap_in_car(guid, car) -> LapData or None:
     dao = Dao("laps.json")
     all_laps = dao.get_dataframe()
     if all_laps.shape[0] > 0:
-        all_laps = all_laps[all_laps.session != "Practice"]
+        #all_laps = all_laps[all_laps.session != "Practice"]
         player_laps = all_laps[all_laps.guid == guid]
         car_laps = player_laps[player_laps.car == car]
         fastest_laps = car_laps[car_laps.laptime == car_laps.laptime.min()]
