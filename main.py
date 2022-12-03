@@ -28,13 +28,15 @@ current_session = []
 Assetto Socket Event Handlers
 '''
 @assetto.event
-def on_assetto_connect():
+def connect():
     '''Setup on connection to plugin'''
 
     print("connected ")
-    assetto.emit("authenticate", "admin")
+    assetto.emit("authenticate", "Puddlefish1!")
     assetto.emit("get_session_info")
     assetto.emit("broadcast_message", "UDP Manager Connected")
+    assetto.emit("admin_command", "/admin Puddlefish1!")
+    assetto.emit("broadcast_message", "/set Server.Name PLEASE")
 
 @assetto.on("chat")
 def on_message(data):
@@ -158,7 +160,6 @@ def on_session_start(session_data):
     current_session.append(sessions[session_data["current_session_index"]])
     print(current_session)
     newline()
-
     discord.emit("new_session", current_session[0])
 
 @assetto.on("session_info")
@@ -183,7 +184,7 @@ def on_disc_connect():
     assetto.emit("get_session_info")
 
 
-def connect(url):
+def connect_sockets(url):
     '''Connect to the plugin via socketio at url'''
     assetto.connect(url)
     discord.run(discord_app, host='0.0.0.0', port=30001)
@@ -195,4 +196,4 @@ def newline():
 
 if __name__ == "__main__":
     url = "http://192.168.1.200:30000"
-    connect(url)
+    connect_sockets(url)
