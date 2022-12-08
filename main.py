@@ -193,6 +193,7 @@ def on_session_info(session_data):
 def on_disc_connect():
     '''On connection to the assetto server'''
     print("Connected To discord")
+    on_session_info(get_session_from_file())
     assetto.emit("get_session_info")
 
 
