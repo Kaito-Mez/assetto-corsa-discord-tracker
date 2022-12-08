@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 from time import sleep
 import socketio
 from flask import Flask
@@ -34,6 +35,9 @@ def connect():
 
     print("connected ")
     assetto.emit("authenticate", get_password())
+
+    on_session_info(get_session_from_file())
+
     assetto.emit("get_session_info")
     assetto.emit("broadcast_message", "UDP Manager Connected")
 
@@ -177,8 +181,6 @@ def on_session_info(session_data):
     '''Sets current_session on connection to the plugin'''
     print("Session info")
     print(session_data)
-    current_session.clear()
-    current_session.append(session_data["name"])
     print(current_session)
     newline()
 
@@ -193,6 +195,14 @@ def on_disc_connect():
     print("Connected To discord")
     assetto.emit("get_session_info")
 
+
+def get_session_from_file():
+    '''Gets the session index from the json for first boot'''
+
+    with open("database/current_session.json", "r") as f:
+        data = json.load(f)
+    
+    return data
 
 def connect_sockets(url):
     '''Connect to the plugin via socketio at url'''

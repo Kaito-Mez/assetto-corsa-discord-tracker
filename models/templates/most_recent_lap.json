@@ -12,7 +12,7 @@
                 "value": "MM:SS.MS"
             },
             {
-                "name": "Average Time:",
+                "name": "Average Lap Time:",
                 "inline": false,
                 "value": "MM:SS.MS"
             }

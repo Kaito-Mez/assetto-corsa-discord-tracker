@@ -5,6 +5,7 @@ import socketio
 from datetime import datetime, timedelta
 import asyncio
 from json import load
+from sys import argv
 
 
 intents = discord.Intents.all()
@@ -378,12 +379,12 @@ def get_token():
         token = f.readline()
         return token
 
-def get_channels():
+def get_channels(week):
     '''Loads the channels that the bot sends to''' 
     with open("config/channels.json", "r") as f:
         loaded_channels = dict(load(f))
 
-    return loaded_channels
+    return loaded_channels[week]
 
 
 '''Socket Event Handlers'''
@@ -432,6 +433,7 @@ async def on_end_session():
     await set_race_perms()
 
 if __name__ == "__main__":
-
-    channels = get_channels()
+    week = argv[-1]
+    print("starting week ", week)
+    channels = get_channels(week)
     client.run(get_token())
