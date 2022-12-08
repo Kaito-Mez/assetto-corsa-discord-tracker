@@ -219,7 +219,7 @@ def write_session_to_file():
         index = 2
 
     with open("database/current_session.json", "w+") as f:
-        data = "{\"current_session_index\":" + index + "}"
+        data = "{\"current_session_index\":" + str(index) + "}"
 
         f.write(data)
 
