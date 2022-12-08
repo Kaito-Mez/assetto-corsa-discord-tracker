@@ -176,6 +176,8 @@ def on_session_start(session_data):
 
     discord.emit("new_session", current_session[0])
 
+    write_session_to_file()
+
 @assetto.on("session_info")
 def on_session_info(session_data):
     '''Sets current_session on connection to the plugin'''
@@ -204,6 +206,22 @@ def get_session_from_file():
         data = json.load(f)
     
     return data
+
+def write_session_to_file():
+    '''Writes the current session to file'''
+
+    index = 0
+
+    if current_session[0] == "Qualification":
+        index = 1
+    
+    elif current_session[0] == "Race":
+        index = 2
+
+    with open("database/current_session.json", "w+") as f:
+        data = "{\"current_session_index\":" + index + "}"
+
+        f.write(data)
 
 def connect_sockets(url):
     '''Connect to the plugin via socketio at url'''
