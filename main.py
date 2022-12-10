@@ -234,7 +234,7 @@ def newline():
 def get_password():
     '''Gets the server password'''
     with open("./config/serverPassword.txt", "r") as f:
-        return f.readline()
+        return f.read().rstrip()
 
 if __name__ == "__main__":
     url = "http://192.168.1.200:30000"
